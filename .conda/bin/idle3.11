@@ -1,0 +1,5 @@
+#!/Users/leonardodicaterina/Documents/GitHub/Machine_Learning_G19/.conda/bin/python3.11
+
+from idlelib.pyshell import main
+if __name__ == '__main__':
+    main()
