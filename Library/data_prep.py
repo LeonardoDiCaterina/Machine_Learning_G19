@@ -1,8 +1,32 @@
 import pandas as pd
 import numpy as np
 
-def cleanUp (df, to_csv = False):
+def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path = '../Data', scale = False, fillna = False, dropna = False):
+    """
+    This function cleans the data and prepares it for the model
+
+    Parameters:
+        df(DataFrame): The data to be cleaned
+        to_csv(bool): If True, the cleaned data will be saved as a csv file
+        to_csv_name(str): The name of the csv file
+        to_csv_path(str): The path where the csv file will be saved
+        scale(bool): If True, the data will be scaled
+        fillna(bool): If True, the missing values will be filled
+        dropna(bool): If True, the missing values will be dropped
+        
+    Returns:
+        DataFrame: The cleaned data
     
+    Example of usage:
+        sys.path.append('../Library')
+        import data_prep as p
+        df = pd.read_csv('../Data/data.csv')
+        df = p.cleanUp(df, to_csv = True)
+        
+       
+        
+
+    """    
     col_to_drop = []
     
     # Numerical Features
@@ -174,8 +198,9 @@ def cleanUp (df, to_csv = False):
     print("----> cleaning up done")
     
     if to_csv:
-        df.to_csv('../Data/cleaned_data.csv', index=False)
-        print("----> saved the cleaned data")
+        path_name = to_csv_path + to_csv_name
+        df.to_csv(path_name, index=False)
+        print(f"----> saved the cleaned data in {path_name}")
     
     return df
     
