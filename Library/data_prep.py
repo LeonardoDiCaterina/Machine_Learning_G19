@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import Warning
 
 def cleanUp (df, to_csv = False):
     
@@ -34,7 +33,6 @@ def cleanUp (df, to_csv = False):
     try:
         df['Alternative Dispute Resolution'] = df['Alternative Dispute Resolution'].map({'Y': 1, 'N': 0})
     except Exception as e:
-        Warning.print("Error mapping 'Alternative Dispute Resolution'")
         print(e)
     
     # encodng the categorical features
@@ -76,7 +74,6 @@ def cleanUp (df, to_csv = False):
         print("1. ---> Carrier Name encoded in Carrier Code_")
         col_to_drop.append('Carrier Name')
     except Exception as e:
-        Warning.print("Error encoding 'Carrier Name' in 'Carrier Code_'")
         print(e)
     
     ## Carrier Type Code_
@@ -85,7 +82,6 @@ def cleanUp (df, to_csv = False):
         print("2. ---> Carrier Type encoded in Carrier Type Code_")
         col_to_drop.append('Carrier Type')
     except Exception as e:
-        Warning.print("Error encoding 'Carrier Type' in 'Carrier Type Code_'")
         print(e)
         
     ##County Code_
@@ -94,7 +90,6 @@ def cleanUp (df, to_csv = False):
         print("3. ---> Country of Injury encoded in Country Code_")
         col_to_drop.append('Country of Injury')
     except Exception as e:
-        Warning.print("Error encoding 'Country of Injury' in 'Country Code_'")
         print(e)
     
     ## covid 19
@@ -102,7 +97,6 @@ def cleanUp (df, to_csv = False):
         df['COVID-19 Indicator'] = df['COVID-19 Indicator'].map({'Y':1, 'N':0})
         print("4. ---> COVID-19 Indicator encoded")
     except Exception as e:
-        Warning.print("Error encoding 'COVID-19 Indicator'")
         print(e)
     
     ## District Code_
@@ -111,7 +105,6 @@ def cleanUp (df, to_csv = False):
         print("5. ---> District Name encoded in District Code_")
         col_to_drop.append('District Name')
     except Exception as e:
-        Warning.print("Error encoding 'District Name' in 'District Code_'")
         print(e)
     
     ## Medical Fee Code_
@@ -120,7 +113,6 @@ def cleanUp (df, to_csv = False):
         print("6. ---> Medical Fee Region encoded in Medical Fee Code_")
         col_to_drop.append('Medical Fee Region')
     except Exception as e:
-        Warning.print("Error encoding 'Medical Fee Region' in 'Medical Fee Code_'")
         print(e)   
         
     ## Nature of Injury Code_
@@ -131,7 +123,6 @@ def cleanUp (df, to_csv = False):
         print("7. ---> Carrier Type encoded in Carrier Type Code_")
         col_to_drop.append('Carrier Type')
     except Exception as e:
-        Warning.print("Error encoding 'Carrier Type' in 'Carrier Type Code_'")
         print(e)
     
         
@@ -145,7 +136,6 @@ def cleanUp (df, to_csv = False):
         try :
             df[col] = pd.to_datetime(df[col], errors='coerce', format='%Y-%m-%d')
         except Exception as e:
-            Warning.print(f"Error in the date format of the column {col}")
             print(e)
     
     # New Date Features
