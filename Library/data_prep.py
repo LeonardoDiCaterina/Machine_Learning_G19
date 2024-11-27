@@ -253,8 +253,10 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
         print(f"----> saved the cleaned data in {path_name}")
     
     if scale:
+            print("----> returning the scaler data")
             return df,scaler_used
-    return df
+    else:
+        return df
     
     
     
