@@ -240,10 +240,10 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
         print("-------Scaling the data---------")
         print("----> scaling the data")
         if scaler_used != None :
-            df[num_col] = scaler_used.fit_transform(df[num_col])
+            df = scaler_used.fit_transform(df)
         else:
             scaler_used = RobustScaler().fit(df)
-        df[num_col] = scaler_used.fit_transform(df[num_col])
+        df = scaler_used.fit_transform(df)
         print("----> scaling done")        
     if to_csv:
         if scale:
