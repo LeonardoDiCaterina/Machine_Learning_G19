@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import RobustScaler
 
 
 # frequency encoding
@@ -10,7 +11,7 @@ def freq_encode(df, col):
     # implement the duplicates later
     return df
 
-def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path = '../Data', scale = False, fillna = False, dropna = False):
+def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path = '../Data', scale = False, scaler_used = None, fillna = False, dropna = False):
     """
     This function cleans the data and prepares it for the model
 
@@ -234,7 +235,16 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
     print("-------Frequency Encoding---------")
     print("A) ---> County of Injury")
     freq_encode(df, 'County of Injury')
-        
+    
+    if scale:
+        print("-------Scaling the data---------")
+        print("----> scaling the data")
+        if scaler_used != None :
+            df[num_col] = scaler_used.fit_transform(df[num_col])
+        else:
+            scaler_used = RobustScaler().fit(df)
+        df[num_col] = scaler_used.fit_transform(df[num_col])
+        print("----> scaling done")        
     if to_csv:
         if scale:
             to_csv_name = 'scaled_' + to_csv_name
@@ -242,6 +252,8 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
         df.to_csv(path_name, index=False)
         print(f"----> saved the cleaned data in {path_name}")
     
+    if scale:
+            return df,scaler_used
     return df
     
     
