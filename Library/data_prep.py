@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import OneHotEncoder
+
 
 def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path = '../Data', scale = False, fillna = False, dropna = False):
     """
@@ -28,7 +30,7 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
 
     """    
     col_to_drop = []
-    
+    non_scalable_col = []
     # Numerical Features
     print("-------Numerical Features---------")
     num_col = df.select_dtypes(include=['int64', 'float64']).columns
@@ -101,12 +103,15 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
         print(e)
     
     ## Carrier Type Code_
-    try: 
+    """"    try: 
         df['Carrier Type Code_'] = df['Carrier Type'].str[:2]
         print("2. ---> Carrier Type encoded in Carrier Type Code_")
         col_to_drop.append('Carrier Type')
     except Exception as e:
-        print(e)
+        print(e) 
+    
+    """
+    print("2. ---> Carrier Type encoded in Carrier Type Code")
         
     ##County Code_
     try:
@@ -197,7 +202,32 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
         print(f"{col} : {df[col].dtype}")
     print("----> cleaning up done")
     
+    #encoding the categorical features
+    print("-------Encoding the categorical features---------")
+    # encoding Attorney/Representative	
+    print("A) ---> encoding Attorney/Representative")
+    df['Attorney/Representative'] = df['Attorney/Representative'].map({'Y':1, 'N':0})
+    
+    # encoding Gender with one hot encoding
+    print("B) ---> encoding Gender")
+    columns_to_encode = ['Gender','Attorney/Representative','WCB Decision','Carrier Type Code']
+    #import one hot encoder
+    #create the encoder
+    encoder = OneHotEncoder(sparse_output=False)
+    encoder = encoder.fit(df['Gender'])
+    encoded_df = pd.DataFrame(encoder.transform(df), columns=encoder.get_feature_names_out(columns_to_encode, index=df.index))
+    non_scalable_col.extend(encoded_df.columns)
+    df = pd.concat([df, encoded_df], axis=1)
+    df.drop(columns=columns_to_encode, inplace=True)
+    print("----> encoding done")
+    print(f"----- dropping the columns: {columns_to_encode}")
+    print(f"created the one hot encoded coluns: {encoded_df.columns}")
+    
+    
+        
     if to_csv:
+        if scale:
+            to_csv_name = 'scaled_' + to_csv_name
         path_name = to_csv_path + to_csv_name
         df.to_csv(path_name, index=False)
         print(f"----> saved the cleaned data in {path_name}")
