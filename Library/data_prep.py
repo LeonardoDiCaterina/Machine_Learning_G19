@@ -237,13 +237,14 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
     freq_encode(df, 'County of Injury')
     
     if scale:
+        num_col = df.select_dtypes(include=['int64', 'float64']).columns
         print("-------Scaling the data---------")
         print("----> scaling the data")
         if scaler_used != None :
-            df = scaler_used.fit_transform(df)
+            df[num_col] = scaler_used[num_col].fit_transform(df[num_col])
         else:
-            scaler_used = RobustScaler().fit(df)
-        df = scaler_used.fit_transform(df)
+            scaler_used = RobustScaler().fit(df[num_col])
+        df[num_col] = scaler_used.fit_transform(df[num_col])
         print("----> scaling done")        
     if to_csv:
         if scale:
