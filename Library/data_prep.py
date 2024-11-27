@@ -3,6 +3,13 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 
 
+# frequency encoding
+def freq_encode(df, col):
+    encoding = df.groupby(col).size()
+    df[col] = df[col].map(encoding)
+    # implement the duplicates later
+    return df
+
 def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path = '../Data', scale = False, fillna = False, dropna = False):
     """
     This function cleans the data and prepares it for the model
@@ -210,12 +217,12 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
     
     # encoding Gender with one hot encoding
     print("B) ---> encoding Gender")
-    columns_to_encode = ['Gender','Attorney/Representative','WCB Decision','Carrier Type Code']
+    columns_to_encode = ['Gender','Attorney/Representative','WCB Decision','Carrier Type Code','First Hearing held']
     #import one hot encoder
     #create the encoder
     encoder = OneHotEncoder(sparse_output=False)
     encoder = encoder.fit(df[columns_to_encode])
-    encoded_df = pd.DataFrame(encoder.transform(df), columns=encoder.get_feature_names_out(columns_to_encode, index=df.index))
+    encoded_df = pd.DataFrame(encoder.transform(df[columns_to_encode]), columns=encoder.get_feature_names_out(columns_to_encode))
     non_scalable_col.extend(encoded_df.columns)
     df = pd.concat([df, encoded_df], axis=1)
     df.drop(columns=columns_to_encode, inplace=True)
@@ -223,7 +230,10 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
     print(f"----- dropping the columns: {columns_to_encode}")
     print(f"created the one hot encoded coluns: {encoded_df.columns}")
     
-    
+    #frequency encoding
+    print("-------Frequency Encoding---------")
+    print("A) ---> County of Injury")
+    freq_encode(df, 'County of Injury')
         
     if to_csv:
         if scale:
