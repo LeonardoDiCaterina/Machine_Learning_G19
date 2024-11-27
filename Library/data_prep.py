@@ -214,7 +214,7 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
     #import one hot encoder
     #create the encoder
     encoder = OneHotEncoder(sparse_output=False)
-    encoder = encoder.fit(df['Gender'])
+    encoder = encoder.fit(df[columns_to_encode])
     encoded_df = pd.DataFrame(encoder.transform(df), columns=encoder.get_feature_names_out(columns_to_encode, index=df.index))
     non_scalable_col.extend(encoded_df.columns)
     df = pd.concat([df, encoded_df], axis=1)
