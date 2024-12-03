@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.decomposition import PCA
 
-class preProcesser():
+class PreProcessor():
     """
     This class is used to preprocess the data before feeding it to the model 
     
@@ -20,38 +20,38 @@ class preProcesser():
         self.columns_to_scale = []
         self.columns_NOT_to_scale = []
         self.columns_to_drop = []
-        self.columns_dorpped = []
+        self.columns_dropped = []
         self.col_to_fillna = []
         self.method_to_fillna = method_to_fillna
         self.start_features = []
         self.end_features = []
         
     def set_start_features(self, df):
-        """ check the snandard start features"""
+        """ check the standard end features"""
         self.start_features = df.columns
         print(f"start features: {self.start_features}")
         return
     def set_end_features(self, df):
-        """ check the snandard start features"""
+        """ check the standard end features"""
         self.end_features = df.columns
         print(f"end features: {self.end_features}")
         return
     
     def check_start_features(self, df):
-        """ check if the features of df are the same as the start features"""
-        features_df = df.columns
+        """ check if the features of df are the same as the end features"""
+        current_features = df.columns
         if len(self.start_features) == 0:
             print("no start features")   
             return
-        if set(self.start_features) != set(features_df):
+        if set(self.start_features) != set(current_features):
             print("features are not the same")
             try:
                 df= df[self.start_features]
-                print(f"the features that have been discarded are {set(features_df) - set(self.start_features)}")
+                print(f"the features that have been discarded are {set(current_features) - set(self.start_features)}")
             except Exception as e:
-                print("couldnot not solve the issue")
+                print("could not solve the issue")
                 print(e)
-        if set(self.start_features) == set(features_df):
+        if set(self.start_features) == set(current_features):
             print("features are the same")
         return
     
@@ -64,24 +64,24 @@ class preProcesser():
     
     def check_end_features(self, df):
         """ check if the features of df are the same as the start features"""
-        features_df = df.columns
+        current_features = df.columns
         if len(self.end_features) == 0:
             print("no end features")   
             return
-        if set(self.end_features) != set(features_df):
+        if set(self.end_features) != set(current_features):
             print("features are not the same")
             try:
                 df= df[self.end_features]
-                print(f"the features that have been discarded are {set(features_df) - set(self.end_features)}")
+                print(f"the features that have been discarded are {set(current_features) - set(self.end_features)}")
             except Exception as e:
-                print("couldnot not solve the issue")
+                print("could not solve the issue")
                 print(e)
         return
     
 
     
     def choose_columns_to_fillna(self, df):
-        self.col_to_fillna = list(df.loc[:, df.isna().sum() > 0].select_dtypes(include=['int64', 'float64']).columns)
+        self.col_to_fillna = list(df.select_dtypes(include=['int64', 'float64']).loc[:, df.isna().sum() > 0].columns)
         return self.col_to_fillna
     
     def get_columns_to_fillna(self):
@@ -97,7 +97,7 @@ class preProcesser():
     
     def choose_columns_to_scale(self, df):
         cols = df.select_dtypes(include=['int64', 'float64']).columns
-        #difference between cols and columns_NOT_to_scale
+        # Identify columns to scale by excluding columns that should not be scaled
         self.columns_to_scale = list(set(cols) - set(self.columns_NOT_to_scale))
         print(f"columns to scale: {self.columns_to_scale}")
         
@@ -171,17 +171,31 @@ class preProcesser():
             print(f"Error in extending columns to drop: {e}")"""
     
     def to_csv(self, df, file_name = 'cleaned_data'):
+        import os
         if not file_name.endswith('.csv'):
             file_name = file_name + '.csv'
-        return df.to_csv(self.path + file_name, index=False)
+        return df.to_csv(os.path.join(self.path, file_name), index=False)
        
         
     
     def freq_encode(self,df, col):
         encoding = df.groupby(col).size()
-        df[col] = df[col].map(encoding)
         # implement the duplicates later
         return df
+        
+        def __str__(self):
+            return (
+                #f"PreProcessor name: {self.__class__.__name__}\n"
+                f"encoder: {self.encoder}\n"
+                +f"scaler: {self.scaler}\n"
+                +f"columns to encode: {self.get_columns_to_encode()}\n"
+                +f"columns to scale: {self.get_columns_to_scale()}\n"
+                +f"columns to drop: {self.get_columns_to_drop()}\n"
+                +f"columns dropped: {self.columns_dropped}\n"
+                +f"columns to fillna: {self.get_columns_to_fillna()}\n"
+                +f"method to fillna: {self.method_to_fillna}\n"
+                +f"file path for saving: {self.path}"
+            )
     def cleanUp (self, df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path = '../Data', fillna = False, dropna = False, pca = False, n_components = None):
         """
         This function cleans the data and prepares it for the model
@@ -204,9 +218,7 @@ class preProcesser():
             df = pd.read_csv('../Data/data.csv')
             df = p.cleanUp(df, to_csv = True)
         """
-        if 'WCB Decision' in df.columns:
-            'this column is not in the train data'
-            self.append_columns_to_drop('WCB Decision')
+        self.append_columns_to_drop('WCB Decision')
                 
         # Numerical Features
         print("1)-------Numerical Features---------")
@@ -466,7 +478,7 @@ class preProcesser():
             print(f"dropping {col} : {df[col].dtype}")
             try:
                 df.drop(columns=col, inplace=True)
-                self.columns_dorpped.append(col)
+                self.columns_dropped.append(col)
                 self.columns_to_drop.remove(col)
             except Exception as e:
                 print(f"could not drop {col}")
@@ -483,6 +495,14 @@ class preProcesser():
             print(e)
         print("----> PCA done")
         return df
+    
+    def pca_report(self):
+        cumsum = np.cumsum(self.pca.explained_variance_ratio_)
+        print(f"cumsum: {cumsum}")
+        plt.plot(cumsum)
+        plt.xlabel('Number of components')
+        plt.ylabel('Explained variance')
+        plt.show()
     
     def encode_df(self, df):
         
@@ -520,7 +540,7 @@ class preProcesser():
                 print("Invalid method")
         return df
     
-    def pipeline(self, df, fit_scaler = True, pca = False, n_components = None, set_end_features = False): 
+    def pipeline(self, df, fit_scaler = True, pca = False, pca_fit = False, n_components = None, set_end_features = False): 
         self.check_start_features(df)
         df = self.cleanUp(df)
         print("-------------cleanUp-------------------")
@@ -564,7 +584,14 @@ class preProcesser():
             df = self.fillnans(df)
             
         if (pca == True) and (n_components != None):
-            df = self.pca_fit(df, n_components)
+            if pca_fit == True:
+                df = self.pca_fit(df, n_components)
+            
+            df = self.use_pca(df)
+            print("------------use_pca--------------------")
+            print(f"--------------{len(df)}----------------")
+            print("--------------------------------")
+            
         return df
     
     def __str__(self):
@@ -575,7 +602,7 @@ class preProcesser():
             +f"columns to encode: {self.get_columns_to_encode()}\n"
             +f"columns to scale: {self.get_columns_to_scale()}\n"
             +f"columns to drop: {self.get_columns_to_drop()}\n"
-            +f"columns dropped: {self.columns_dorpped}\n"
+            +f"columns dropped: {self.columns_dropped}\n"
             +f"columns to fillna: {self.get_columns_to_fillna()}\n"
             +f"method to fillna: {self.method_to_fillna}\n"
             +f"file path for saving: {self.path}"
