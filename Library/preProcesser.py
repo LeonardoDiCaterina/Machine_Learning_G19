@@ -13,9 +13,11 @@ class PreProcessor():
         self.scale = scale
         self.fillna = fillna
         self.path = '../Data'
-        self.scaler = StandardScaler()
+        self.scaler = RobustScaler()
         self.encoder = OneHotEncoder()
         self.columns_to_encode = ['Gender','Attorney/Representative','Carrier Type Code','First Hearing held']
+        self.columns_to_frequency_encode = ['County of Injury']
+        
 
         self.columns_to_scale = []
         self.columns_NOT_to_scale = []
@@ -25,6 +27,8 @@ class PreProcessor():
         self.method_to_fillna = method_to_fillna
         self.start_features = []
         self.end_features = []
+        
+        self.pca = PCA()
         
     def set_start_features(self, df):
         """ check the standard end features"""
@@ -101,6 +105,8 @@ class PreProcessor():
         self.columns_to_scale = list(set(cols) - set(self.columns_NOT_to_scale))
         print(f"columns to scale: {self.columns_to_scale}")
         
+    def get_columns_to_frequency_encode(self):
+        return self.columns_to_frequency_encode 
         
     def get_columns_to_encode(self):
         return self.columns_to_encode
@@ -149,7 +155,16 @@ class PreProcessor():
                 self.columns_to_drop.append(col)
         except Exception as e:
             print(f"Error in appending column to drop: {e}")
-        
+    
+    def append_columns_to_frequency_encode(self, col=None):
+        try:
+            if col in self.get_columns_to_frequency_encode():
+                print(f"{col} already in columns to frequency encode")
+            else:
+                self.columns_to_frequency_encode.append(col)
+        except Exception as e:
+            print(f"Error in appending column to frequency encode: {e}")
+    
     """def extend_columns_to_encode(self, l_cols):
         try:
             self.columns_to_encode = self.get_columns_to_encode(l_cols)
@@ -181,7 +196,11 @@ class PreProcessor():
     def freq_encode(self,df, col):
         encoding = df.groupby(col).size()
         # implement the duplicates later
-        return df
+        df[col] =  df[col].map(encoding)
+    
+    def freq_encode_features(self,df):
+        for col in self.get_columns_to_frequency_encode():
+            self.freq_encode(df,col)
         
         def __str__(self):
             return (
@@ -469,6 +488,7 @@ class PreProcessor():
             df.loc[:, self.get_columns_to_scale()] = self.scaler.transform(df[self.get_columns_to_scale()])
         except Exception as e:
             print(e)
+            return print('could not scale')
         print("----> scaling done")
         return df
     
@@ -487,6 +507,11 @@ class PreProcessor():
             print("----> columns dropped")
         print(f"columns not dropped: {self.get_columns_to_drop()}")
         return df
+    
+    def fit_pca(self, df, n_components):
+        self.pca = PCA(n_components=n_components)
+        self.pca.fit(df)
+        return
     
     def use_pca(self, df):
         try:
@@ -550,6 +575,9 @@ class PreProcessor():
         print("------------encode_df--------------------")
         print(f"--------------{len(df)}----------------")
         print("--------------------------------")
+        
+        self.freq_encode_features(df)
+        
         df = self.drop_columns(df)
         print("------------drop_columns--------------------")
         print(f"--------------{len(df)}----------------")

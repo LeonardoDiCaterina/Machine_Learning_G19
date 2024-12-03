@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import RobustScaler
-
+from sklearn.decomposition import PCA
 
 # frequency encoding
 def freq_encode(df, col):
@@ -11,7 +11,7 @@ def freq_encode(df, col):
     # implement the duplicates later
     return df
 
-def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path = '../Data', scale = False, scaler_used = None, fillna = False, dropna = False):
+def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path = '../Data', scale = False, scaler_used = None, fillna = False, dropna = False, pca = False, n_components = None):
     """
     This function cleans the data and prepares it for the model
 
@@ -224,7 +224,6 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
     encoder = OneHotEncoder(sparse_output=False)
     encoder = encoder.fit(df[columns_to_encode])
     encoded_df = pd.DataFrame(encoder.transform(df[columns_to_encode]), columns=encoder.get_feature_names_out(columns_to_encode))
-    non_scalable_col.extend(encoded_df.columns)
     df = pd.concat([df, encoded_df], axis=1)
     df.drop(columns=columns_to_encode, inplace=True)
     print("----> encoding done")
@@ -236,16 +235,50 @@ def cleanUp (df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path =
     print("A) ---> County of Injury")
     freq_encode(df, 'County of Injury')
     
-    if scale:
+    if scale and scaler_used:
         num_col = df.select_dtypes(include=['int64', 'float64']).columns
         print("-------Scaling the data---------")
         print("----> scaling the data")
         if scaler_used != None :
             df[num_col] = scaler_used[num_col].fit_transform(df[num_col])
         else:
-            scaler_used = RobustScaler().fit(df[num_col])
-        df[num_col] = scaler_used.fit_transform(df[num_col])
-        print("----> scaling done")        
+            try:
+                scaler_used = RobustScaler().fit(df[num_col])
+                df[num_col] = scaler_used.fit_transform(df[num_col])
+            except Exception as e:
+                if not isinstance(scaler_used, RobustScaler):
+                    print('Scaler is not a RobustScaler')
+                print(e)    
+        print("----> scaling done")
+    if fillna:
+        print("-------Filling the missing values---------")
+        print("----> filling the missing values")
+        df.fillna(method='ffill', inplace=True)
+        print("----> filling done")
+    if dropna:
+        print("-------Dropping the missing values---------")
+        print("----> dropping the missing values")
+        df.dropna(inplace=True)
+        print("----> dropping done")
+    
+    if pca:
+        print("-------PCA---------")
+        print("----> applying PCA")
+        pca = PCA(n_components=n_components)
+        df_pca = pca.fit_transform(df)
+        
+        plt.figure(figsize=(10,10))
+        plt.plot(np.cumsum(pca.explained_variance_ratio_))
+        plt.xlabel('Number of Components')
+        plt.ylabel('Variance (%)') #for each component
+        plt.title('Explained Variance')
+        plt.show()
+        
+        pca.components_
+        
+        print("----> PCA done")
+        
+            
     if to_csv:
         if scale:
             to_csv_name = 'scaled_' + to_csv_name
