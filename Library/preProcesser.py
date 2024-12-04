@@ -383,7 +383,9 @@ class PreProcessor():
         print("appending the code columns to NOT scale")
         for col in code_col:
             print(f"appending {col} type: {df[col].dtype}")
-            self.append_columns_NOT_to_scale(col)
+            self.append_columns_to_frequency_encode(col)
+            
+            
 
 
         # Date Features
