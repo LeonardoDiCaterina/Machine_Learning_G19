@@ -103,6 +103,7 @@ class PreProcessor():
         cols = df.select_dtypes(include=['int64','int32', 'float64']).columns
         # Identify columns to scale by excluding columns that should not be scaled
         self.columns_to_scale = list(set(cols) - set(self.columns_NOT_to_scale))
+        self.append_columns_to_scale('County of Injury')
         print(f"columns to scale: {self.columns_to_scale}")
         
     def get_columns_to_frequency_encode(self):
