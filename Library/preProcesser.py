@@ -593,7 +593,7 @@ class PreProcessor():
             cols = self.get_columns_to_scale()
         
             if fit_scaler == True:
-                df[cols] = self.scaler_fit(df[cols])
+                self.scaler_fit(df[cols])
                 print("------------scaler_fit--------------------")
                 print(f"--------------{len(df)}----------------")
                 print("--------------------------------")
