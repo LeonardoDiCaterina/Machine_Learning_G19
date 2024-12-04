@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, RobustScaler
 from sklearn.decomposition import PCA
 
 class PreProcessor():
@@ -85,7 +85,7 @@ class PreProcessor():
 
     
     def choose_columns_to_fillna(self, df):
-        self.col_to_fillna = list(df.select_dtypes(include=['int64', 'float64']).loc[:, df.isna().sum() > 0].columns)
+        self.col_to_fillna = list(df.select_dtypes(include=['int64','int32', 'float64']).loc[:, df.isna().sum() > 0].columns)
         return self.col_to_fillna
     
     def get_columns_to_fillna(self):
@@ -100,7 +100,7 @@ class PreProcessor():
         return
     
     def choose_columns_to_scale(self, df):
-        cols = df.select_dtypes(include=['int64', 'float64']).columns
+        cols = df.select_dtypes(include=['int64','int32', 'float64']).columns
         # Identify columns to scale by excluding columns that should not be scaled
         self.columns_to_scale = list(set(cols) - set(self.columns_NOT_to_scale))
         print(f"columns to scale: {self.columns_to_scale}")
@@ -466,11 +466,12 @@ class PreProcessor():
         if len(self.get_columns_to_scale()) == 0:
             self.choose_columns_to_scale(df)
         try:
-            self.scaler.fit(df[self.get_columns_to_scale()])
-            df.loc[:, self.get_columns_to_scale()] = self.scaler.fit_transform(df[self.get_columns_to_scale()])
+            self.scaler = self.scaler.fit(df[self.get_columns_to_scale()])
+            #df.loc[:, self.get_columns_to_scale()] = self.scaler.fit_transform(df[self.get_columns_to_scale()])
+            print("scaler_fit----> scaling done")
         except Exception as e:
             print(e)    
-        print("scaler_fit----> scaling done")
+        
         return df
     
     def pca_fit(self, df, n_components):
