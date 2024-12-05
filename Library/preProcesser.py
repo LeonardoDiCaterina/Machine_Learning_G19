@@ -30,6 +30,10 @@ class PreProcessor():
         
         self.pca = PCA()
         
+        self.cat_features = []
+        self.num_features = []
+        self.date_features = []
+        
     def set_start_features(self, df):
         """ check the standard end features"""
         self.start_features = df.columns
@@ -59,12 +63,20 @@ class PreProcessor():
             print("features are the same")
         return
     
+    def get_cat_features(self):
+        return self.cat_features
+    
+    def get_num_features(self):
+        return self.num_features
+    
     def get_start_features(self):
         return self.start_features
     
     def get_end_features(self):
         return self.end_features
     
+    def get_date_features(self):
+        return self.date_features
     
     def check_end_features(self, df):
         """ check if the features of df are the same as the start features"""
@@ -167,6 +179,37 @@ class PreProcessor():
         except Exception as e:
             print(f"Error in appending column to frequency encode: {e}")
     
+    def append_cat_features(self, col=None):
+        try:
+            if col in self.get_cat_features():
+                print(f"{col} already in cat features")
+            else:
+                self.cat_features.append(col)
+        except Exception as e:
+            print(f"Error in appending column to cat features: {e}")
+            
+    def append_num_features(self, col=None):
+        try:
+            if col in self.get_num_features():
+                print(f"{col} already in num features")
+            else:
+                self.num_features.append(col)
+        except Exception as e:
+            print(f"Error in appending column to num features: {e}")
+            
+    def append_date_features(self, col=None):
+        try:
+            if col in self.get_date_features():
+                print(f"{col} already in date features")
+            else:
+                self.date_features.append(col)
+        except Exception as e:
+            print(f"Error in appending column to date features: {e}")        
+            
+            
+            
+
+    
     """def extend_columns_to_encode(self, l_cols):
         try:
             self.columns_to_encode = self.get_columns_to_encode(l_cols)
@@ -248,6 +291,7 @@ class PreProcessor():
         print("A) ---> dealing with the Average Weekly Wage")
         df["log_Average Weekly Wage"] = np.log(df["Average Weekly Wage"]+1)
         self.append_columns_to_drop('Average Weekly Wage')
+        self.append_num_features('log_Average Weekly Wage')
 
         ## Birth Year
         print("B) ---> dealing with the Birth Year")
@@ -259,6 +303,7 @@ class PreProcessor():
         ## IM4 Count
         df.fillna({'IME-4 Count': 0}, inplace=True)
         self.append_columns_NOT_to_scale('IME-4 Count')
+        self.append_num_features('IME-4 Count')
 
         # Categorical Features
         print("2)-------Categorical Features---------")
@@ -281,7 +326,7 @@ class PreProcessor():
         except Exception as e:
             print(e)
 
-        # encodng the categorical features
+        """# encodng the categorical features
         print("C) ---> encoding the categorical features")
 
         ## import the lookup tables
@@ -311,7 +356,7 @@ class PreProcessor():
         print("8. ---> lookup_nature_of_injury")
 
         lookup_Part_of_Body = pd.read_csv('../Data/lookup_part_of_body.csv')
-        print("9. ---> lookup_part_of_body")
+        print("9. ---> lookup_part_of_body")"""
 
         print("4)-------encoding the categorical features: ---------")
         ## Carrier Code_
@@ -384,6 +429,7 @@ class PreProcessor():
         for col in code_col:
             print(f"appending {col} type: {df[col].dtype}")
             self.append_columns_to_frequency_encode(col)
+            self.cat_features.append(col)
             
             
 
@@ -391,7 +437,7 @@ class PreProcessor():
         # Date Features
         print("5) -------Date Features---------")
         date_col = cat_col[cat_col.str.contains('Date')]
-        print("setin every date to date time")
+        print("setting every date to date time")
         date_col = cat_col[cat_col.str.contains('Date')]
         for col in date_col:
             try :
@@ -405,37 +451,48 @@ class PreProcessor():
         df['Accident Year_'] = df['Accident Date'].dt.year
         df['Accident Month_'] = df['Accident Date'].dt.month
         self.append_columns_to_drop('Accident Date')
+        self.append_date_features('Accident Year_')
+        self.append_date_features('Accident Month_')
+        
 
         print("B) ---> Assembly Date year and month")
         df['Assembly Year_'] = df['Assembly Date'].dt.year
         df['Assembly Month_'] = df['Assembly Date'].dt.month
         self.append_columns_to_drop('Assembly Date')
+        self.append_date_features('Assembly Year_')
+        self.append_date_features('Assembly Month_')
 
         print("C) ---> C-2 year and month")
         df['C-2 Year_'] = df['C-2 Date'].dt.year
         df['C-2 Month_'] = df['C-2 Date'].dt.month
         self.append_columns_to_drop('C-2 Date')
+        self.append_date_features('C-2 Year_')
+        self.append_date_features('C-2 Month_')
 
         print("D) ---> C-3 year and month")
         df['C-3 Year_'] = df['C-3 Date'].dt.year
         df['C-3 Month_'] = df['C-3 Date'].dt.month
         self.append_columns_to_drop( 'C-3 Date')
+        self.append_date_features('C-3 Year_')
+        self.append_date_features('C-3 Month_')
 
         print("E) --->First Hearing year and month")
         df['First Hearing Year_'] = df['First Hearing Date'].dt.year
         df['First Hearing Month_'] = df['First Hearing Date'].dt.month
         df['First Hearing held'] = ~df['First Hearing Date'].isna()
         self.append_columns_to_drop('First Hearing Date')
+        self.append_date_features('First Hearing Year_')
+        self.append_date_features('First Hearing Month_')
 
         print("7) -------appending Description columns to col_to_drop---------")
         desc_col = list(df.columns[df.columns.str.contains('Description')])
         for col in desc_col:
             print(f"appending {col} type: {df[col].dtype}")
-            self.append_columns_to_drop( col)
+            self.append_columns_to_drop(col)
         print(f"->{self.get_columns_to_drop()}")
         print("8)-------Encoding the categorical features---------")
         # encoding Attorney/Representative	
-        print("A) ---> encoding Attorney/Representative")
+        #print("A) ---> encoding Attorney/Representative")
        
         #df['Attorney/Representative'] = df['Attorney/Representative'].map({'Y':1, 'N':0})
 
@@ -463,6 +520,7 @@ class PreProcessor():
         print("A) ---> County of Injury")
         self.freq_encode(df, 'County of Injury')
         self.append_columns_NOT_to_scale('County of Injury')
+        self.append_cat_features ('County of Injury')
         
         return df
 
