@@ -36,8 +36,8 @@ class PreProcessor():
         self.date_features = []
         self.dummy_features = []
         self.fe_features = []
-        print("version 1.0 ") 
-        print("6 dec 12.44")
+        self.version = "1.0 6 dec 12:46"
+        
         
     def set_start_features(self, df):
         """ check the standard end features"""
@@ -840,6 +840,7 @@ class PreProcessor():
     def __str__(self):
         return (
             #f"preProcesser name: {self.__class__.__name__}\n"
+            +f"version: {self.version}\n"
             f"encoder: {self.encoder}\n"
             +f"scaler: {self.scaler}\n"
             +f"start features: {self.get_start_features()}\n"
