@@ -36,7 +36,7 @@ class PreProcessor():
         self.date_features = []
         self.dummy_features = []
         self.fe_features = []
-        self.version = "1.0 6 dec 12:46"
+        self.version = "2.0 6 dec 12:46"
         
         
     def set_start_features(self, df):
@@ -782,16 +782,19 @@ class PreProcessor():
         df = self.cleanUp(df)
         print("-------------cleanUp-------------------")
         print(f"--------------{len(df)}----------------")
+        print(f"nan count: {df.isna().sum().sum()}")
         print("--------------------------------")
         df = self.encode_df(df)
         print("------------encode_df--------------------")
         print(f"--------------{len(df)}----------------")
+        print(f"nan count: {df.isna().sum().sum()}")
         print("--------------------------------")
         
 
         df = self.drop_columns(df)
         print("------------drop_columns--------------------")
         print(f"--------------{len(df)}----------------")
+        print(f"nan count: {df.isna().sum().sum()}")
         print("--------------------------------")
         if self.scale == True:
             self.choose_columns_to_scale(df)
@@ -805,14 +808,17 @@ class PreProcessor():
             if fit_scaler == True:
                 self.scaler_fit(df[cols])
                 print("------------scaler_fit--------------------")
+                print(f"nan count: {df.isna().sum().sum()}")
                 print(f"--------------{len(df)}----------------")
                 print("--------------------------------")
             df[cols] = self.use_scaler(df[cols])
             print("------------use_scaler--------------------")
             print(f"--------------{len(df)}----------------")
+            print(f"nan count: {df.isna().sum().sum()}")
             print("--------------------------------")
         print("------------freq_encode_features--------------------")
         df = self.freq_encode_features(df)
+        print(f"nan count: {df.isna().sum().sum()}")
 
         if set_end_features == True:
             self.set_end_features(df)
@@ -840,7 +846,7 @@ class PreProcessor():
     def __str__(self):
         return (
             #f"preProcesser name: {self.__class__.__name__}\n"
-            +f"version: {self.version}\n"
+            f"version: {self.version}\n"
             +f"encoder: {self.encoder}\n"
             +f"scaler: {self.scaler}\n"
             +f"start features: {self.get_start_features()}\n"
