@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, RobustScaler
 from sklearn.decomposition import PCA
 
@@ -33,6 +34,10 @@ class PreProcessor():
         self.cat_features = []
         self.num_features = []
         self.date_features = []
+        self.dummy_features = []
+        self.fe_features = []
+        print("version 1.0 ") 
+        print("6 dec 12.44")
         
     def set_start_features(self, df):
         """ check the standard end features"""
@@ -63,20 +68,7 @@ class PreProcessor():
             print("features are the same")
         return
     
-    def get_cat_features(self):
-        return self.cat_features
     
-    def get_num_features(self):
-        return self.num_features
-    
-    def get_start_features(self):
-        return self.start_features
-    
-    def get_end_features(self):
-        return self.end_features
-    
-    def get_date_features(self):
-        return self.date_features
     
     def check_end_features(self, df):
         """ check if the features of df are the same as the start features"""
@@ -92,6 +84,27 @@ class PreProcessor():
             except Exception as e:
                 print("could not solve the issue")
                 print(e)
+        for col in self.get_date_features():
+            if col not in self.end_features:
+                print(f"{col} not in end features")
+                self.remove_date_features(col)
+        for col in self.get_cat_features():
+            if col not in self.end_features:
+                print(f"{col} not in end features")
+                self.remove_cat_features(col)
+        for col in self.get_num_features():
+            if col not in self.end_features:
+                print(f"{col} not in end features")
+                self.remove_num_features(col)
+        for col in self.get_dummy_features():
+            if col not in self.end_features:
+                print(f"{col} not in end features")
+                self.remove_dummy_features(col)
+        for col in self.get_columns_to_frequency_encode():
+            if col not in self.end_features:
+                print(f"{col} not in end features")
+                self.remove_columns_to_frequency_encode(col)
+        
         return
     
 
@@ -100,8 +113,14 @@ class PreProcessor():
         self.col_to_fillna = list(df.select_dtypes(include=['int64','int32', 'float64']).loc[:, df.isna().sum() > 0].columns)
         return self.col_to_fillna
     
-    def get_columns_to_fillna(self):
-        return self.col_to_fillna
+    def choose_columns_to_scale(self, df):
+        cols = df.select_dtypes(include=['int64','int32', 'float64']).columns
+        # Identify columns to scale by excluding columns that should not be scaled
+        self.columns_to_scale = list(set(cols) - set(self.columns_NOT_to_scale))
+        print("**************** columns to scale ****************")
+        self.append_columns_to_scale('County of Injury')
+        print(f"columns to scale: {self.columns_to_scale}")
+        
     
     def select_method_to_fillna(self, method_to_fillna):
         
@@ -111,13 +130,8 @@ class PreProcessor():
         self.method = method_to_fillna
         return
     
-    def choose_columns_to_scale(self, df):
-        cols = df.select_dtypes(include=['int64','int32', 'float64']).columns
-        # Identify columns to scale by excluding columns that should not be scaled
-        self.columns_to_scale = list(set(cols) - set(self.columns_NOT_to_scale))
-        print("**************** columns to scale ****************")
-        self.append_columns_to_scale('County of Injury')
-        print(f"columns to scale: {self.columns_to_scale}")
+    def get_columns_to_fillna(self):
+        return self.col_to_fillna
         
     def get_columns_to_frequency_encode(self):
         return self.columns_to_frequency_encode 
@@ -133,6 +147,27 @@ class PreProcessor():
     
     def get_columns_to_drop(self):
         return self.columns_to_drop
+    
+    def get_dummy_features(self):
+        return self.dummy_features
+
+    def get_cat_features(self):
+        return self.cat_features
+    
+    def get_num_features(self):
+        return self.num_features
+    
+    def get_start_features(self):
+        return self.start_features
+    
+    def get_end_features(self):
+        return self.end_features
+    
+    def get_date_features(self):
+        return self.date_features
+    
+    def get_fe_features(self):
+        return self.fe_features
     
     def append_columns_to_encode(self, col=None): 
         try:
@@ -204,8 +239,115 @@ class PreProcessor():
             else:
                 self.date_features.append(col)
         except Exception as e:
-            print(f"Error in appending column to date features: {e}")        
+            print(f"Error in appending column to date features: {e}")    
+    
+    def append_dummy_features(self, col=None):
+        try:
+            if col in self.get_dummy_features():
+                print(f"{col} already in dummy features")
+            else:
+                self.dummy_features.append(col)
+        except Exception as e:
+            print(f"Error in appending column to dummy features: {e}")
+    
+    def append_fe_features(self, col=None):
+        try:
+            if col in self.get_fe_features():
+                print(f"{col} already in fe features")
+            else:
+                self.fe_features.append(col)
+        except Exception as e:
+            print(f"Error in appending column to fe features: {e}")
             
+    def remove_columns_to_encode(self, col=None): 
+        try:
+            if col in self.get_columns_to_encode():
+                self.columns_to_encode.remove(col)
+            else:
+                print(f"{col} not in columns to encode")
+        except Exception as e:
+            print(f"Error in removing column to encode: {e}")
+    
+    def remove_columns_to_scale(self, col=None):
+        try:
+            if col in self.get_columns_to_scale():
+                self.columns_to_scale.remove(col)
+            else:
+                print(f"{col} not in columns to scale")
+        except Exception as e:
+            print(f"Error in removing column to scale: {e}")
+    
+    def remove_columns_NOT_to_scale(self, col=None):
+        try:
+            if col in self.get_columns_NOT_to_scale():
+                self.columns_NOT_to_scale.remove(col)
+            else:
+                print(f"{col} not in columns not to scale")
+        except Exception as e:
+            print(f"Error in removing column not to scale: {e}")
+    
+    def remove_columns_to_drop(self, col=None):
+        try:
+            if col in self.get_columns_to_drop():
+                self.columns_to_drop.remove(col)
+            else:
+                print(f"{col} not in columns to drop")
+        except Exception as e:
+            print(f"Error in removing column to drop: {e}")
+    
+    def remove_columns_to_frequency_encode(self, col=None):
+        try:
+            if col in self.get_columns_to_frequency_encode():
+                self.columns_to_frequency_encode.remove(col)
+            else:
+                print(f"{col} not in columns to frequency encode")
+        except Exception as e:
+            print(f"Error in removing column to frequency encode: {e}")
+            
+    def remove_cat_features(self, col=None):
+        try:
+            if col in self.get_cat_features():
+                self.cat_features.remove(col)
+            else:
+                print(f"{col} not in cat features")
+        except Exception as e:
+            print(f"Error in removing column to cat features: {e}")
+    
+    def remove_num_features(self, col=None):
+        try:
+            if col in self.get_num_features():
+                self.num_features.remove(col)
+            else:
+                print(f"{col} not in num features")
+        except Exception as e:
+            print(f"Error in removing column to num features: {e}")
+    
+    def remove_date_features(self, col=None):
+        try:
+            if col in self.get_date_features():
+                self.date_features.remove(col)
+            else:
+                print(f"{col} not in date features")
+        except Exception as e:
+            print(f"Error in removing column to date features: {e}")
+    
+    def remove_dummy_features(self, col=None):
+        try:
+            if col in self.get_dummy_features():
+                self.dummy_features.remove(col)
+            else:
+                print(f"{col} not in dummy features")
+        except Exception as e:
+            print(f"Error in removing column to dummy features: {e}")    
+    
+    def remove_fe_features(self, col=None):
+        try:
+            if col in self.get_fe_features():
+                self.fe_features.remove(col)
+            else:
+                print(f"{col} not in fe features")
+        except Exception as e:
+            print(f"Error in removing column to fe features: {e}")
             
             
 
@@ -238,19 +380,23 @@ class PreProcessor():
        
         
     
-    def freq_encode(self,df, col):
+    """def freq_encode(self,df, col):
         encoding = df.groupby(col).size()
         # implement the duplicates later
-        df[col] =  df[col].map(encoding)
+        df[col] =  df[col].map(encoding)"""
     
     def freq_encode_features(self,df):
         for col in self.get_columns_to_frequency_encode():
-            self.freq_encode(df,col)
+            fe_name = col + '_fe'
+            df[fe_name] = df[col].map(df[col].value_counts())
+            return df
+            
+            #self.freq_encode(df,col)
         
         def __str__(self):
             return (
                 #f"PreProcessor name: {self.__class__.__name__}\n"
-                f"encoder: {self.encoder}\n"
+                 f"encoder: {self.encoder}\n"
                 +f"scaler: {self.scaler}\n"
                 +f"columns to encode: {self.get_columns_to_encode()}\n"
                 +f"columns to scale: {self.get_columns_to_scale()}\n"
@@ -326,7 +472,7 @@ class PreProcessor():
         except Exception as e:
             print(e)
 
-        """# encodng the categorical features
+        # encodng the categorical features
         print("C) ---> encoding the categorical features")
 
         ## import the lookup tables
@@ -356,7 +502,7 @@ class PreProcessor():
         print("8. ---> lookup_nature_of_injury")
 
         lookup_Part_of_Body = pd.read_csv('../Data/lookup_part_of_body.csv')
-        print("9. ---> lookup_part_of_body")"""
+        print("9. ---> lookup_part_of_body")
 
         print("4)-------encoding the categorical features: ---------")
         ## Carrier Code_
@@ -380,7 +526,7 @@ class PreProcessor():
         print("2. ---> Carrier Type encoded in Carrier Type Code")
         ##County Code_
         try:
-            df['Country of Injury'] = df['Country of Injury'].map(lookup_Country.set_index('County Name')['County Code'])
+            df['Country of Injury Code_'] = df['Country of Injury'].map(lookup_Country.set_index('County Name')['County Code'])
             print("3. ---> Country of Injury encoded in Country Code_")
             self.append_columns_to_drop('Country of Injury')
             self.append_columns_NOT_to_scale('Country of Injury')
@@ -397,9 +543,9 @@ class PreProcessor():
 
         ## District Code_
         try:
-            df['District Code'] = df['District Name'].map(lookup_District.set_index('District Name')['District Code'])
+            df['District Code_'] = df['District Name'].map(lookup_District.set_index('District Name')['District Code_'])
             print("5. ---> District Name encoded in District Code_")
-            self.append_columns_NOT_to_scale('District Code')
+            self.append_columns_NOT_to_scale('District Code_')
             self.append_columns_to_drop('District Name')
         except Exception as e:
             print(e)
@@ -518,7 +664,7 @@ class PreProcessor():
         #frequency encoding
         print("-------Frequency Encoding---------")
         print("A) ---> County of Injury")
-        self.freq_encode(df, 'County of Injury')
+        self.append_columns_to_frequency_encode('County of Injury')
         self.append_columns_NOT_to_scale('County of Injury')
         self.append_cat_features ('County of Injury')
         
@@ -558,8 +704,8 @@ class PreProcessor():
     def drop_columns(self, df):
         list_of_columns = self.get_columns_to_drop().copy()
         for col in list_of_columns:
-            print(f"dropping {col} : {df[col].dtype}")
             try:
+                print(f"dropping {col} : {df[col].dtype}")
                 df.drop(columns=col, inplace=True)
                 self.columns_dropped.append(col)
                 self.columns_to_drop.remove(col)
@@ -598,6 +744,9 @@ class PreProcessor():
         encoder = encoder.fit(df[self.get_columns_to_encode()])
         self.encoder = self.encoder.fit(df[self.get_columns_to_encode()])
         encoded_col_df = pd.DataFrame(encoder.transform(df[self.get_columns_to_encode()]), columns=encoder.get_feature_names_out(self.get_columns_to_encode()))
+        for col in encoder.get_feature_names_out(self.get_columns_to_encode()):
+            self.append_columns_NOT_to_scale(col)
+            self.append_dummy_features(col)
         print(f"----> encoding done! created: {encoded_col_df.columns}")
         for col in self.get_columns_to_encode():
             self.append_columns_to_drop(col)
@@ -639,8 +788,7 @@ class PreProcessor():
         print(f"--------------{len(df)}----------------")
         print("--------------------------------")
         
-        self.freq_encode_features(df)
-        
+
         df = self.drop_columns(df)
         print("------------drop_columns--------------------")
         print(f"--------------{len(df)}----------------")
@@ -663,11 +811,15 @@ class PreProcessor():
             print("------------use_scaler--------------------")
             print(f"--------------{len(df)}----------------")
             print("--------------------------------")
+        print("------------freq_encode_features--------------------")
+        df = self.freq_encode_features(df)
 
         if set_end_features == True:
             self.set_end_features(df)
         if set_end_features == False:
             self.check_end_features(df)
+        
+        
         
         if self.fillna == True:
             self.choose_columns_to_fillna(df)
@@ -690,6 +842,13 @@ class PreProcessor():
             #f"preProcesser name: {self.__class__.__name__}\n"
             f"encoder: {self.encoder}\n"
             +f"scaler: {self.scaler}\n"
+            +f"start features: {self.get_start_features()}\n"
+            +f"end features: {self.get_end_features()}\n"
+            +f"cat features: {self.get_cat_features()}\n"
+            +f"num features: {self.get_num_features()}\n"
+            +f"date features: {self.get_date_features()}\n"
+            +f"dummy features: {self.get_dummy_features()}\n"
+            +f"columns to frequency encode: {self.get_columns_to_frequency_encode()}\n"
             +f"columns to encode: {self.get_columns_to_encode()}\n"
             +f"columns to scale: {self.get_columns_to_scale()}\n"
             +f"columns to drop: {self.get_columns_to_drop()}\n"
