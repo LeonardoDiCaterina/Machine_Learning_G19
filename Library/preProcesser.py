@@ -841,7 +841,7 @@ class PreProcessor():
         return (
             #f"preProcesser name: {self.__class__.__name__}\n"
             +f"version: {self.version}\n"
-            f"encoder: {self.encoder}\n"
+            +f"encoder: {self.encoder}\n"
             +f"scaler: {self.scaler}\n"
             +f"start features: {self.get_start_features()}\n"
             +f"end features: {self.get_end_features()}\n"
