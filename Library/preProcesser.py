@@ -17,7 +17,7 @@ class PreProcessor():
         self.scaler = RobustScaler()
         self.encoder = OneHotEncoder()
         self.columns_to_encode = ['Gender','Attorney/Representative','Carrier Type Code','First Hearing held']
-        self.columns_to_frequency_encode = ['County of Injury']
+        self.columns_to_freq_encode = []#['County of Injury','Carrier Code_','Carrier Type Code','Country of Injury Code','District Code','Medical Fee Code','Nature of Injury Code','Part of Body Code']
         
 
         self.columns_to_scale = []
@@ -36,7 +36,10 @@ class PreProcessor():
         self.date_features = []
         self.dummy_features = []
         self.fe_features = []
-        self.version = "2.0 6 dec 12:46"
+        self.code_features = []
+        
+        
+        self.version = "3.0 8 dec 17:08"
         
         
     def set_start_features(self, df):
@@ -100,10 +103,10 @@ class PreProcessor():
             if col not in self.end_features:
                 print(f"{col} not in end features")
                 self.remove_dummy_features(col)
-        for col in self.get_columns_to_frequency_encode():
+        for col in self.get_columns_to_freq_encode():
             if col not in self.end_features:
                 print(f"{col} not in end features")
-                self.remove_columns_to_frequency_encode(col)
+                self.remove_columns_to_freq_encode(col)
         
         return
     
@@ -116,10 +119,16 @@ class PreProcessor():
     def choose_columns_to_scale(self, df):
         cols = df.select_dtypes(include=['int64','int32', 'float64']).columns
         # Identify columns to scale by excluding columns that should not be scaled
-        self.columns_to_scale = list(set(cols) - set(self.columns_NOT_to_scale))
-        print("**************** columns to scale ****************")
+        self.columns_to_scale = list(set(cols) - set(self.columns_NOT_to_scale) - set(self.code_features) )
+        #print("**************** columns to scale ****************")
         self.append_columns_to_scale('County of Injury')
-        print(f"columns to scale: {self.columns_to_scale}")
+        #print(f"columns to scale: {self.columns_to_scale}")
+        
+    def choose_columns_to_freq_encode(self, df):
+        
+        code_cols = self.get_code_features()
+        for col in code_cols:
+            self.append_columns_to_freq_encode(col)
         
     
     def select_method_to_fillna(self, method_to_fillna):
@@ -133,8 +142,8 @@ class PreProcessor():
     def get_columns_to_fillna(self):
         return self.col_to_fillna
         
-    def get_columns_to_frequency_encode(self):
-        return self.columns_to_frequency_encode 
+    def get_columns_to_freq_encode(self):
+        return self.columns_to_freq_encode 
         
     def get_columns_to_encode(self):
         return self.columns_to_encode
@@ -168,6 +177,9 @@ class PreProcessor():
     
     def get_fe_features(self):
         return self.fe_features
+    
+    def get_code_features(self):
+        return self.code_features
     
     def append_columns_to_encode(self, col=None): 
         try:
@@ -205,12 +217,12 @@ class PreProcessor():
         except Exception as e:
             print(f"Error in appending column to drop: {e}")
     
-    def append_columns_to_frequency_encode(self, col=None):
+    def append_columns_to_freq_encode(self, col=None):
         try:
-            if col in self.get_columns_to_frequency_encode():
+            if col in self.get_columns_to_freq_encode():
                 print(f"{col} already in columns to frequency encode")
             else:
-                self.columns_to_frequency_encode.append(col)
+                self.columns_to_freq_encode.append(col)
         except Exception as e:
             print(f"Error in appending column to frequency encode: {e}")
     
@@ -259,6 +271,15 @@ class PreProcessor():
         except Exception as e:
             print(f"Error in appending column to fe features: {e}")
             
+    def append_code_features(self, col=None):
+        try:
+            if col in self.get_code_features():
+                print(f"{col} already in code features")
+            else:
+                self.code_features.append(col)
+        except Exception as e:
+            print(f"Error in appending column to code features: {e}")
+            
     def remove_columns_to_encode(self, col=None): 
         try:
             if col in self.get_columns_to_encode():
@@ -295,10 +316,10 @@ class PreProcessor():
         except Exception as e:
             print(f"Error in removing column to drop: {e}")
     
-    def remove_columns_to_frequency_encode(self, col=None):
+    def remove_columns_to_freq_encode(self, col=None):
         try:
-            if col in self.get_columns_to_frequency_encode():
-                self.columns_to_frequency_encode.remove(col)
+            if col in self.get_columns_to_freq_encode():
+                self.columns_to_freq_encode.remove(col)
             else:
                 print(f"{col} not in columns to frequency encode")
         except Exception as e:
@@ -349,28 +370,16 @@ class PreProcessor():
         except Exception as e:
             print(f"Error in removing column to fe features: {e}")
             
+    
+    def remove_code_features(self, col=None):
+        try:
+            if col in self.get_code_features():
+                self.code_features.remove(col)
+            else:
+                print(f"{col} not in code features")
+        except Exception as e:
+            print(f"Error in removing column to code features: {e}")
             
-
-    
-    """def extend_columns_to_encode(self, l_cols):
-        try:
-            self.columns_to_encode = self.get_columns_to_encode(l_cols)
-        except Exception as e:
-            print(f"Error in extending columns to encode: {e}")"""
-    
-    """ def extend_columns_to_scale(self, l_cols):
-        try:
-            self.columns_to_scale = self.get_columns_to_scale(l_cols)
-        except Exception as e:
-            print(f"Error in extending columns to scale: {e}")"""
-    
-    """def extend_columns_to_drop(self, l_cols):
-        try:
-            self.columns_to_drop = self.get_columns_to_drop(l_cols)
-            print (f"columns to drop: {self.columns_to_drop}")
-            print (f"columns to drop: {l_cols}")
-        except Exception as e:
-            print(f"Error in extending columns to drop: {e}")"""
     
     def to_csv(self, df, file_name = 'cleaned_data'):
         import os
@@ -386,26 +395,34 @@ class PreProcessor():
         df[col] =  df[col].map(encoding)"""
     
     def freq_encode_features(self,df):
-        for col in self.get_columns_to_frequency_encode():
+        self.choose_columns_to_freq_encode(df)
+        cols = self.get_columns_to_freq_encode()
+        #print(f"freq_encode_features ---> {cols}")
+        for col in cols:
             fe_name = col + '_fe'
-            df[fe_name] = df[col].map(df[col].value_counts())
-            return df
-            
-            #self.freq_encode(df,col)
+            try:
+                df[fe_name] = df[col].map(df[col].value_counts())
+            except:
+                print(f"could not create {fe_name}")
+            self.append_fe_features(fe_name)
+            self.append_columns_NOT_to_scale(col)
+        return df
+
         
-        def __str__(self):
-            return (
-                #f"PreProcessor name: {self.__class__.__name__}\n"
-                 f"encoder: {self.encoder}\n"
-                +f"scaler: {self.scaler}\n"
-                +f"columns to encode: {self.get_columns_to_encode()}\n"
-                +f"columns to scale: {self.get_columns_to_scale()}\n"
-                +f"columns to drop: {self.get_columns_to_drop()}\n"
-                +f"columns dropped: {self.columns_dropped}\n"
-                +f"columns to fillna: {self.get_columns_to_fillna()}\n"
-                +f"method to fillna: {self.method_to_fillna}\n"
-                +f"file path for saving: {self.path}"
-            )
+
+    def __str__(self):
+        return (
+            #f"PreProcessor name: {self.__class__.__name__}\n"
+            f"encoder: {self.encoder}\n"
+            +f"scaler: {self.scaler}\n"
+            +f"columns to encode: {self.get_columns_to_encode()}\n"
+            +f"columns to scale: {self.get_columns_to_scale()}\n"
+            +f"columns to drop: {self.get_columns_to_drop()}\n"
+            +f"columns dropped: {self.columns_dropped}\n"
+            +f"columns to fillna: {self.get_columns_to_fillna()}\n"
+            +f"method to fillna: {self.method_to_fillna}\n"
+            +f"file path for saving: {self.path}"
+        )
     def cleanUp (self, df, to_csv = False, to_csv_name = 'cleaned_data.csv', to_csv_path = '../Data', fillna = False, dropna = False, pca = False, n_components = None):
         """
         This function cleans the data and prepares it for the model
@@ -434,17 +451,17 @@ class PreProcessor():
         print("1)-------Numerical Features---------")
         num_col = df.select_dtypes(include=['int64', 'float64']).columns
         ## Average Weekly Wage
-        print("A) ---> dealing with the Average Weekly Wage")
-        df["log_Average Weekly Wage"] = np.log(df["Average Weekly Wage"]+1)
+        #print("A) ---> dealing with the Average Weekly Wage")
+        #df["log_Average Weekly Wage"] = np.log(df["Average Weekly Wage"]+1)
         self.append_columns_to_drop('Average Weekly Wage')
         self.append_num_features('log_Average Weekly Wage')
 
         ## Birth Year
-        print("B) ---> dealing with the Birth Year")
+        #print("B) ---> dealing with the Birth Year")
         nan_treshold_Birth_Year = 1900
         df["Birth Year"] = df["Birth Year"].apply(lambda x: x if x > nan_treshold_Birth_Year else np.nan)
         df["Age_"] = 2019 - df["Birth Year"]
-        print("created ---> Age_")
+        #print("created ---> Age_")
 
         ## IM4 Count
         df.fillna({'IME-4 Count': 0}, inplace=True)
@@ -457,15 +474,16 @@ class PreProcessor():
         ## Zip Code -> freq encding would be nice
         df['Zip Code'] = df['Zip Code'].fillna('00000')
         df['Zip Code'] = df['Zip Code'].str[:5]
-        df['Zip Code'] = df['Zip Code'].apply(lambda x: int(x) if x.isnumeric() else 0)
-        print("--- now zip code is numeric")
+        #df['Zip Code'] = df['Zip Code'].apply(lambda x: int(x) if x.isnumeric() else 0)
+        #print("created ---> Zip Code")
+        self.append_code_features('Zip Code')
         
         
         cat_col = df.select_dtypes(include=['object']).columns
         
 
 
-        print("B) ---> dealing with Alternative Dispute Resolution")
+        #print("B) ---> dealing with Alternative Dispute Resolution")
         try:
             df['Alternative Dispute Resolution'] = df['Alternative Dispute Resolution'].map({'Y': 1, 'N': 0})
             self.append_columns_NOT_to_scale('Alternative Dispute Resolution')  
@@ -473,44 +491,45 @@ class PreProcessor():
             print(e)
 
         # encodng the categorical features
-        print("C) ---> encoding the categorical features")
+        #print("C) ---> encoding the categorical features")
 
         ## import the lookup tables
-        print("D) --->importing the lookup tables:")
+        #print("D) --->importing the lookup tables:")
         lookup_Carrier = pd.read_csv('../Data/lookup_carrier.csv')
-        print("1. ---> lookup_carrier")
+        #print("1. ---> lookup_carrier")
 
         lookup_Carrier_Type = pd.read_csv('../Data/lookup_carrier_type.csv')
-        print("2. ---> lookup_carrier_type")
+        #print("2. ---> lookup_carrier_type")
 
         lookup_Cause_of_Injury = pd.read_csv('../Data/lookup_cause_of_injury.csv')
-        print("3. ---> lookup_cause_of_injury")
+        #print("3. ---> lookup_cause_of_injury")
 
         lookup_Country = pd.read_csv('../Data/lookup_country.csv')
-        print("4. ---> lookup_country")
+        #print("4. ---> lookup_country")
 
         lookup_District = pd.read_csv('../Data/lookup_district.csv')
-        print("5. ---> lookup_district")
+        #print("5. ---> lookup_district")
 
         lookup_Industry_Code = pd.read_csv('../Data/lookup_industry_code.csv')
-        print("6. ---> lookup_industry_code")
+        #print("6. ---> lookup_industry_code")
 
         lookup_Medical_fee = pd.read_csv('../Data/lookup_medical_fee.csv')
-        print("7. ---> lookup_medical_fee")
+        #print("7. ---> lookup_medical_fee")
 
         lookup_Nature_of_Injury = pd.read_csv('../Data/lookup_nature_of_injury.csv')
-        print("8. ---> lookup_nature_of_injury")
+        #print("8. ---> lookup_nature_of_injury")
 
         lookup_Part_of_Body = pd.read_csv('../Data/lookup_part_of_body.csv')
-        print("9. ---> lookup_part_of_body")
+        #print("9. ---> lookup_part_of_body")
 
-        print("4)-------encoding the categorical features: ---------")
+        #print("4)-------encoding the categorical features: ---------")
         ## Carrier Code_
         try:
             df['Carrier Code_'] = df['Carrier Name'].map(lookup_Carrier.set_index('Carrier Name')['Carrier Code'])
-            print("1. ---> Carrier Name encoded in Carrier Code_")
+            #print("1. ---> Carrier Name encoded in Carrier Code_")
             self.append_columns_to_drop('Carrier Name')
             self.append_columns_NOT_to_scale('Carrier Code_')
+            self.append_code_features('Carrier Code_')
         except Exception as e:
             print(e)
 
@@ -527,35 +546,39 @@ class PreProcessor():
         ##County Code_
         try:
             df['Country of Injury Code_'] = df['Country of Injury'].map(lookup_Country.set_index('County Name')['County Code'])
-            print("3. ---> Country of Injury encoded in Country Code_")
+            #print("3. ---> Country of Injury encoded in Country Code_")
             self.append_columns_to_drop('Country of Injury')
             self.append_columns_NOT_to_scale('Country of Injury')
+            self.append_code_features('Country of Injury Code_')
         except Exception as e:
             print(e)
 
         ## covid 19
         try:
             df['COVID-19 Indicator'] = df['COVID-19 Indicator'].map({'Y':1, 'N':0})
-            print("4. ---> COVID-19 Indicator encoded")
+            #print("4. ---> COVID-19 Indicator encoded")
             self.append_columns_NOT_to_scale('COVID-19 Indicator')
+            self.append_dummy_features('COVID-19 Indicator')
         except Exception as e:
             print(e)
 
         ## District Code_
         try:
             df['District Code_'] = df['District Name'].map(lookup_District.set_index('District Name')['District Code_'])
-            print("5. ---> District Name encoded in District Code_")
+            #print("5. ---> District Name encoded in District Code_")
             self.append_columns_NOT_to_scale('District Code_')
             self.append_columns_to_drop('District Name')
+            self.append_code_features('District Code_')
         except Exception as e:
             print(e)
 
         ## Medical Fee Code_
         try:
             df['Medical Fee Code_'] = df['Medical Fee Region'].map(lookup_Medical_fee.set_index('Medical Fee Region')['Medical Fee Code'])
-            print("6. ---> Medical Fee Region encoded in Medical Fee Code_")
+            #print("6. ---> Medical Fee Region encoded in Medical Fee Code_")
             self.append_columns_NOT_to_scale('Medical Fee Code_')
             self.append_columns_to_drop('Medical Fee Region')
+            self.append_code_features('Medical Fee Code_')
         except Exception as e:
             print(e)   
 
@@ -564,26 +587,20 @@ class PreProcessor():
         ## Carrier Type Code_
         try:
             df['Carrier Type Code'] = df['Carrier Type'].str[:2]
-            print("7. ---> Carrier Type encoded in Carrier Type Code_")
+            #print("7. ---> Carrier Type encoded in Carrier Type Code_")
             self.append_columns_NOT_to_scale('Carrier Type Code')
             self.append_columns_to_drop('Carrier Type')
+            self.append_code_features('Carrier Type Code')
         except Exception as e:
             print(e)
-
-        code_col = list(df.columns[df.columns.str.contains('Code')])
-        print("appending the code columns to NOT scale")
-        for col in code_col:
-            print(f"appending {col} type: {df[col].dtype}")
-            self.append_columns_to_frequency_encode(col)
-            self.cat_features.append(col)
             
             
 
 
         # Date Features
-        print("5) -------Date Features---------")
+        #print("5) -------Date Features---------")
         date_col = cat_col[cat_col.str.contains('Date')]
-        print("setting every date to date time")
+        #print("setting every date to date time")
         date_col = cat_col[cat_col.str.contains('Date')]
         for col in date_col:
             try :
@@ -592,8 +609,8 @@ class PreProcessor():
                 print(e)
 
         # New Date Features
-        print("6) -------New Date Features---------")
-        print("A) ---> Accident Date year and month")
+        #print("6) -------New Date Features---------")
+        #print("A) ---> Accident Date year and month")
         df['Accident Year_'] = df['Accident Date'].dt.year
         df['Accident Month_'] = df['Accident Date'].dt.month
         self.append_columns_to_drop('Accident Date')
@@ -601,28 +618,28 @@ class PreProcessor():
         self.append_date_features('Accident Month_')
         
 
-        print("B) ---> Assembly Date year and month")
+        #print("B) ---> Assembly Date year and month")
         df['Assembly Year_'] = df['Assembly Date'].dt.year
         df['Assembly Month_'] = df['Assembly Date'].dt.month
         self.append_columns_to_drop('Assembly Date')
         self.append_date_features('Assembly Year_')
         self.append_date_features('Assembly Month_')
 
-        print("C) ---> C-2 year and month")
+        #print("C) ---> C-2 year and month")
         df['C-2 Year_'] = df['C-2 Date'].dt.year
         df['C-2 Month_'] = df['C-2 Date'].dt.month
         self.append_columns_to_drop('C-2 Date')
         self.append_date_features('C-2 Year_')
         self.append_date_features('C-2 Month_')
 
-        print("D) ---> C-3 year and month")
+        #print("D) ---> C-3 year and month")
         df['C-3 Year_'] = df['C-3 Date'].dt.year
         df['C-3 Month_'] = df['C-3 Date'].dt.month
         self.append_columns_to_drop( 'C-3 Date')
         self.append_date_features('C-3 Year_')
         self.append_date_features('C-3 Month_')
 
-        print("E) --->First Hearing year and month")
+        #print("E) --->First Hearing year and month")
         df['First Hearing Year_'] = df['First Hearing Date'].dt.year
         df['First Hearing Month_'] = df['First Hearing Date'].dt.month
         df['First Hearing held'] = ~df['First Hearing Date'].isna()
@@ -630,20 +647,20 @@ class PreProcessor():
         self.append_date_features('First Hearing Year_')
         self.append_date_features('First Hearing Month_')
 
-        print("7) -------appending Description columns to col_to_drop---------")
+        #print("7) -------appending Description columns to col_to_drop---------")
         desc_col = list(df.columns[df.columns.str.contains('Description')])
         for col in desc_col:
-            print(f"appending {col} type: {df[col].dtype}")
+            #print(f"appending {col} type: {df[col].dtype}")
             self.append_columns_to_drop(col)
-        print(f"->{self.get_columns_to_drop()}")
-        print("8)-------Encoding the categorical features---------")
+        #print(f"->{self.get_columns_to_drop()}")
+        #print("8)-------Encoding the categorical features---------")
         # encoding Attorney/Representative	
         #print("A) ---> encoding Attorney/Representative")
        
         #df['Attorney/Representative'] = df['Attorney/Representative'].map({'Y':1, 'N':0})
 
         # encoding Gender with one hot encoding
-        print("B) ---> encoding Gender")
+        #print("B) ---> encoding Gender")
         #columns_to_encode = ['Gender','Attorney/Representative','Carrier Type Code','First Hearing held']
         #import one hot encoder
         #create the encoder
@@ -664,7 +681,7 @@ class PreProcessor():
         #frequency encoding
         print("-------Frequency Encoding---------")
         print("A) ---> County of Injury")
-        self.append_columns_to_frequency_encode('County of Injury')
+        self.append_columns_to_freq_encode('County of Injury')
         self.append_columns_NOT_to_scale('County of Injury')
         self.append_cat_features ('County of Injury')
         
@@ -763,7 +780,7 @@ class PreProcessor():
         if len(self.get_columns_to_fillna()) == 0:
             print("No columns to fillna")
             return df
-        print(f"columns to fillna: {self.get_columns_to_fillna()}")
+        #print(f"columns to fillna: {self.get_columns_to_fillna()}")
         for col in self.col_to_fillna:
             if self.method_to_fillna == 'mean':
                 df[col] = df[col].fillna(df[col].mean())
@@ -791,15 +808,39 @@ class PreProcessor():
         print("--------------------------------")
         
 
+
+        print("------------freq_encode_features--------------------")
+        df = self.freq_encode_features(df)
+        print(f"nan count: {df.isna().sum().sum()}")
+
         df = self.drop_columns(df)
         print("------------drop_columns--------------------")
         print(f"--------------{len(df)}----------------")
         print(f"nan count: {df.isna().sum().sum()}")
         print("--------------------------------")
+        
         if self.scale == True:
             self.choose_columns_to_scale(df)
             col2s = self.get_columns_to_scale()
-            print(col2s)
+            for col in self.get_columns_to_scale():
+                if df[col].dtype == 'object':
+                    self.remove_columns_to_scale(col)
+                    print(f"removing {col} from columns to scale because it is an object")
+                if df[col].nunique() == 1:
+                    self.remove_columns_to_scale(col)
+                    print(f"removing {col} from columns to scale because it has only one unique value")
+                if df[col].nunique() == 0:
+                    self.remove_columns_to_scale(col)
+                    print(f"removing {col} from columns to scale because it has no unique value")
+                if col in self.get_code_features():
+                    self.remove_columns_to_scale(col)
+                    print(f"removing {col} from columns to scale because it is a code feature")
+                
+                if col in self.get_dummy_features():
+                    self.remove_columns_to_scale(col)
+                    print(f"removing {col} from columns to scale because it is a dummy feature")
+            
+
             print("------------choose_columns_to_scale--------------------")
             for col in col2s:
                 print(f"columns to scale: {col} type: {df[col].dtype}")
@@ -816,9 +857,7 @@ class PreProcessor():
             print(f"--------------{len(df)}----------------")
             print(f"nan count: {df.isna().sum().sum()}")
             print("--------------------------------")
-        print("------------freq_encode_features--------------------")
-        df = self.freq_encode_features(df)
-        print(f"nan count: {df.isna().sum().sum()}")
+
 
         if set_end_features == True:
             self.set_end_features(df)
@@ -855,7 +894,8 @@ class PreProcessor():
             +f"num features: {self.get_num_features()}\n"
             +f"date features: {self.get_date_features()}\n"
             +f"dummy features: {self.get_dummy_features()}\n"
-            +f"columns to frequency encode: {self.get_columns_to_frequency_encode()}\n"
+            +f"fe features: {self.get_fe_features()}\n"
+            +f"columns to frequency encode: {self.get_columns_to_freq_encode()}\n"
             +f"columns to encode: {self.get_columns_to_encode()}\n"
             +f"columns to scale: {self.get_columns_to_scale()}\n"
             +f"columns to drop: {self.get_columns_to_drop()}\n"
