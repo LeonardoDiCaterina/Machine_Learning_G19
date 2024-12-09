@@ -42,7 +42,7 @@ class PreProcessor():
         self.code_features = []
         
         
-        self.version = "6.0 9 dec 16:47 chocapic"
+        self.version = "6.1 9 dec 16:47 chocapic"
         
         
     def set_start_features(self, df):
@@ -204,7 +204,7 @@ class PreProcessor():
         if self.status == 'solid':     
             if col not in self.scaler.get_feature_names_out():
                 print(f"status: {self.status}")
-                print("cannot append columns to scale")
+                print(f"cannot {col} append columns to scale")
                 return
         try:
             if col in self.get_columns_to_scale():
