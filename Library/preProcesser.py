@@ -42,7 +42,7 @@ class PreProcessor():
         self.code_features = []
         
         
-        self.version = "4.0 9 dec 00:38 pasta al ragu"
+        self.version = "5.0 9 dec 9:57 pasta al ragu in freezer"
         
         
     def set_start_features(self, df):
@@ -648,6 +648,7 @@ class PreProcessor():
             self.append_columns_NOT_to_scale('District Code_')
             self.append_columns_to_drop('District Name')
             self.append_code_features('District Code_')
+            
         except Exception as e:
             print(e)
 
@@ -670,10 +671,55 @@ class PreProcessor():
             self.append_columns_NOT_to_scale('Carrier Type Code')
             self.append_columns_to_drop('Carrier Type')
             self.append_code_features('Carrier Type Code')
+            self.append_cat_features('Carrier Type Code')
         except Exception as e:
             print(e)
             
+        ### WCIO Part of Body Code
+        try:
+            df['Part of Body Code_'] = df['WCIO Part of Body Code'].astype(str)
+            self.append_cat_features('WCIO Part of Body Code')
+            self.append_columns_NOT_to_scale('WCIO Part of Body Code')
+            self.append_code_features('Part of Body Code_')
+        except Exception as e:
+            print(e)
+
+        ## WCIO Nature of Injury Code
+        try:
+            df['Nature of Injury Code_'] = df['WCIO Nature of Injury Code'].astype(str)
+            self.append_cat_features('WCIO Nature of Injury Code')
+            self.append_columns_NOT_to_scale('WCIO Nature of Injury Code')
+            self.append_code_features('Nature of Injury Code_')
+        except Exception as e:
+            print(e)
+        
+        ## WCIO Cause of Injury Code
+        try:
+            df['Cause of Injury Code_'] = df['WCIO Cause of Injury Code'].astype(str)
+            self.append_cat_features('WCIO Cause of Injury Code')
+            self.append_columns_NOT_to_scale('WCIO Cause of Injury Code')
+            self.append_code_features('Cause of Injury Code_')
+        except Exception as e:
+            print(e)
             
+        ## WCIO Industry Code
+        try:
+            df['Industry Code_'] = df['WCIO Industry Code'].astype(str)
+            self.append_cat_features('WCIO Industry Code')
+            self.append_columns_NOT_to_scale('WCIO Industry Code')
+            self.append_code_features('Industry Code_')
+        except Exception as e:
+            print(e)
+        
+        ## Carrier Type Code_
+        try:
+            df['Carrier Type Code_'] = df['Carrier Type'].astype(str)
+            #print("8. ---> Carrier Type encoded in Carrier Type Code_")
+            self.append_columns_NOT_to_scale('Carrier Type Code_')
+            self.append_columns_to_drop('Carrier Type')
+            self.append_code_features('Carrier Type Code_')
+        except Exception as e:
+            print(e)
 
 
         # Date Features
