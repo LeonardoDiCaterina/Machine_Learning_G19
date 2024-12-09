@@ -11,6 +11,9 @@ class PreProcessor():
 
     """
     def __init__(self, scale=True,fillna = True, method_to_fillna='mean'):
+        
+        self.status = 'init'
+        
         self.scale = scale
         self.fillna = fillna
         self.path = '../Data'
@@ -39,7 +42,7 @@ class PreProcessor():
         self.code_features = []
         
         
-        self.version = "3.0 8 dec 17:08"
+        self.version = "4.0 9 dec 00:38 pasta al ragu"
         
         
     def set_start_features(self, df):
@@ -181,7 +184,14 @@ class PreProcessor():
     def get_code_features(self):
         return self.code_features
     
-    def append_columns_to_encode(self, col=None): 
+    def append_columns_to_encode(self, col=None):
+        if self.status == 'solid':
+            if col in self.get_columns_to_encode():
+                return
+            else:
+                print(f"status: {self.status}")
+                print("cannot append columns to encode")
+            return
         try:
             if col in self.get_columns_to_encode():
                 print(f"{col} already in columns to encode")
@@ -191,6 +201,13 @@ class PreProcessor():
             print(f"Error in appending column to encode: {e}")
     
     def append_columns_to_scale(self, col=None):
+        if self.status == 'solid':
+            if col in self.get_columns_to_scale():
+                return
+            else:
+                print(f"status: {self.status}")
+                print("cannot append columns to scale")
+            return
         try:
             if col in self.get_columns_to_scale():
                 print(f"{col} already in columns to scale")
@@ -200,6 +217,13 @@ class PreProcessor():
             print(f"Error in appending column to scale: {e}")
             
     def append_columns_NOT_to_scale(self, col=None):
+        if self.status == 'solid':
+            if col in self.get_columns_NOT_to_scale():
+                return
+            else:
+                print(f"status: {self.status}")
+                print("cannot append columns NOT to scale")
+            return
         try:
             if col in self.get_columns_NOT_to_scale():
                 print(f"{col} already in columns not to scale")
@@ -209,6 +233,10 @@ class PreProcessor():
             print(f"Error in appending column not to scale: {e}")
     
     def append_columns_to_drop(self, col=None):
+        if self.status == 'solid' and col in self.get_end_features():
+                print(f"status: {self.status}")
+                print("cannot append columns to drop because they are in end features")
+                return
         try:
             if col in self.get_columns_to_drop():
                 print(f"{col} already in columns to drop")
@@ -218,6 +246,13 @@ class PreProcessor():
             print(f"Error in appending column to drop: {e}")
     
     def append_columns_to_freq_encode(self, col=None):
+        if self.status == 'solid':
+            if col in self.get_columns_to_freq_encode():
+                return
+            else:
+                print(f"status: {self.status}")
+                print("cannot append columns to frequency encode")
+            return
         try:
             if col in self.get_columns_to_freq_encode():
                 print(f"{col} already in columns to frequency encode")
@@ -227,6 +262,13 @@ class PreProcessor():
             print(f"Error in appending column to frequency encode: {e}")
     
     def append_cat_features(self, col=None):
+        if self.status == 'solid':
+            if col in self.get_cat_features():
+                return
+            else:
+                print(f"status: {self.status}")
+                print("cannot append columns to cat features")
+            return
         try:
             if col in self.get_cat_features():
                 print(f"{col} already in cat features")
@@ -236,6 +278,13 @@ class PreProcessor():
             print(f"Error in appending column to cat features: {e}")
             
     def append_num_features(self, col=None):
+        if self.status == 'solid':
+            if col in self.get_num_features():
+                return
+            else:
+                print(f"status: {self.status}")
+                print("cannot append columns to num features")
+            return
         try:
             if col in self.get_num_features():
                 print(f"{col} already in num features")
@@ -245,6 +294,13 @@ class PreProcessor():
             print(f"Error in appending column to num features: {e}")
             
     def append_date_features(self, col=None):
+        if self.status == 'solid':
+            if col in self.get_date_features():
+                return
+            else:
+                print(f"status: {self.status}")
+                print("cannot append columns to date features")
+            return
         try:
             if col in self.get_date_features():
                 print(f"{col} already in date features")
@@ -254,6 +310,13 @@ class PreProcessor():
             print(f"Error in appending column to date features: {e}")    
     
     def append_dummy_features(self, col=None):
+        if self.status == 'solid':
+            if col in self.get_dummy_features():
+                return
+            else:
+                print(f"status: {self.status}")
+                print("cannot append columns to dummy features")
+            return
         try:
             if col in self.get_dummy_features():
                 print(f"{col} already in dummy features")
@@ -263,6 +326,13 @@ class PreProcessor():
             print(f"Error in appending column to dummy features: {e}")
     
     def append_fe_features(self, col=None):
+        if self.status == 'solid':
+            if col in self.get_fe_features():
+                return
+            else:
+                print(f"status: {self.status}")
+                print("cannot append columns to fe features")
+            return
         try:
             if col in self.get_fe_features():
                 print(f"{col} already in fe features")
@@ -272,6 +342,13 @@ class PreProcessor():
             print(f"Error in appending column to fe features: {e}")
             
     def append_code_features(self, col=None):
+        if self.status == 'solid':
+            if col in self.get_code_features():
+                return
+            else:
+                print(f"status: {self.status}")
+                print("cannot append columns to code features")
+            return
         try:
             if col in self.get_code_features():
                 print(f"{col} already in code features")
@@ -461,6 +538,8 @@ class PreProcessor():
         nan_treshold_Birth_Year = 1900
         df["Birth Year"] = df["Birth Year"].apply(lambda x: x if x > nan_treshold_Birth_Year else np.nan)
         df["Age_"] = 2019 - df["Birth Year"]
+        self.append_columns_to_drop('Birth Year')
+        self.append_num_features('Age_')
         #print("created ---> Age_")
 
         ## IM4 Count
@@ -795,6 +874,10 @@ class PreProcessor():
         return df
     
     def pipeline(self, df, fit_scaler = True, pca = False, pca_fit = False, n_components = None, set_end_features = False): 
+        if set_end_features == False:
+            self.status = "solid"
+        if set_end_features == True:
+            self.status = "draft"
         self.check_start_features(df)
         df = self.cleanUp(df)
         print("-------------cleanUp-------------------")
