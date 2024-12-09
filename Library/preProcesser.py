@@ -42,7 +42,7 @@ class PreProcessor():
         self.code_features = []
         
         
-        self.version = "6.1 9 dec 16:47 chocapic"
+        self.version = "6.2 9 dec 16:47 chocapic"
         
         
     def set_start_features(self, df):
@@ -526,10 +526,9 @@ class PreProcessor():
                 
         # Numerical Features
         print("1)-------Numerical Features---------")
-        num_col = df.select_dtypes(include=['int64', 'float64']).columns
         ## Average Weekly Wage
         #print("A) ---> dealing with the Average Weekly Wage")
-        #df["log_Average Weekly Wage"] = np.log(df["Average Weekly Wage"]+1)
+        df["log_Average Weekly Wage"] = np.log(df["Average Weekly Wage"]+1)
         self.append_columns_to_drop('Average Weekly Wage')
         self.append_num_features('log_Average Weekly Wage')
 
