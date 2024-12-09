@@ -42,7 +42,7 @@ class PreProcessor():
         self.code_features = []
         
         
-        self.version = "5.0 9 dec 9:57 pasta al ragu in freezer"
+        self.version = "6.0 9 dec 16:47 chocapic"
         
         
     def set_start_features(self, df):
@@ -201,13 +201,11 @@ class PreProcessor():
             print(f"Error in appending column to encode: {e}")
     
     def append_columns_to_scale(self, col=None):
-        if self.status == 'solid':
-            if col in self.get_columns_to_scale():
-                return
-            else:
+        if self.status == 'solid':     
+            if col not in self.scaler.get_feature_names_out():
                 print(f"status: {self.status}")
                 print("cannot append columns to scale")
-            return
+                return
         try:
             if col in self.get_columns_to_scale():
                 print(f"{col} already in columns to scale")
@@ -215,6 +213,8 @@ class PreProcessor():
                 self.columns_to_scale.append(col)
         except Exception as e:
             print(f"Error in appending column to scale: {e}")
+                    
+                    
             
     def append_columns_NOT_to_scale(self, col=None):
         if self.status == 'solid':
@@ -640,6 +640,13 @@ class PreProcessor():
             self.append_dummy_features('COVID-19 Indicator')
         except Exception as e:
             print(e)
+        
+        ## Agreement Reached
+        try:
+            self.append_columns_NOT_to_scale('Agreement Reached')
+            self.append_dummy_features('Agreement Reached')
+        except Exception as e:
+            print(e)
 
         ## District Code_
         try:
@@ -672,6 +679,7 @@ class PreProcessor():
             self.append_columns_to_drop('Carrier Type')
             self.append_code_features('Carrier Type Code')
             self.append_cat_features('Carrier Type Code')
+            self.append_columns_to_freq_encode('Carrier Type Code')
         except Exception as e:
             print(e)
             
