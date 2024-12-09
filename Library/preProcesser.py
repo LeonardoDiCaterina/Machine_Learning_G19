@@ -22,7 +22,7 @@ class PreProcessor():
         self.columns_to_encode = ['Gender','Attorney/Representative','Carrier Type Code','First Hearing held']
         self.columns_to_freq_encode = []#['County of Injury','Carrier Code_','Carrier Type Code','Country of Injury Code','District Code','Medical Fee Code','Nature of Injury Code','Part of Body Code']
         
-
+        self.scaled_feature =[]
         self.columns_to_scale = []
         self.columns_NOT_to_scale = []
         self.columns_to_drop = []
@@ -42,7 +42,7 @@ class PreProcessor():
         self.code_features = []
         
         
-        self.version = "6.2 9 dec 16:47 chocapic"
+        self.version = "6.3 9 dec 16:47 chocapic"
         
         
     def set_start_features(self, df):
@@ -183,6 +183,9 @@ class PreProcessor():
     
     def get_code_features(self):
         return self.code_features
+
+    def get_scaled_features(self):
+        return self.scaled_features
     
     def append_columns_to_encode(self, col=None):
         if self.status == 'solid':
@@ -340,6 +343,15 @@ class PreProcessor():
                 self.fe_features.append(col)
         except Exception as e:
             print(f"Error in appending column to fe features: {e}")
+            
+    def append_scaled_feature(self, col=None):
+        try:
+            if col in self.get_scaled_features():
+                print(f"{col} already in scaled features")
+            else:
+                self.scaled_features.append(col)
+        except Exception as e:
+            print(f"Error in appending column to scaled features: {e}")
             
     def append_code_features(self, col=None):
         if self.status == 'solid':
@@ -975,7 +987,16 @@ class PreProcessor():
                 if col in self.get_dummy_features():
                     self.remove_columns_to_scale(col)
                     print(f"removing {col} from columns to scale because it is a dummy feature")
+                    
+            if self.status == 'draft':
+                for col in self.get_columns_to_scale():
+                    self.append_scaled_feature(col)
+
             
+            if self.status == 'solid':
+                if  self.get_columns_to_scale() != self.get_column_scaled():
+                    print("columns to scale and columns scaled are not the same")
+                    print(f"the following columns are not scaled: {set(self.get_columns_to_scale()) - set(self.column_scaled())}")
 
             print("------------choose_columns_to_scale--------------------")
             for col in col2s:
