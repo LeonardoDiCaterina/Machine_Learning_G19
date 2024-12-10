@@ -22,7 +22,7 @@ class PreProcessor():
         self.columns_to_encode = ['Gender','Attorney/Representative','Carrier Type Code','First Hearing held']
         self.columns_to_freq_encode = []#['County of Injury','Carrier Code_','Carrier Type Code','Country of Injury Code','District Code','Medical Fee Code','Nature of Injury Code','Part of Body Code']
         
-        self.scaled_feature =[]
+        self.scaled_features =[]
         self.columns_to_scale = []
         self.columns_NOT_to_scale = []
         self.columns_to_drop = []
@@ -42,7 +42,7 @@ class PreProcessor():
         self.code_features = []
         
         
-        self.version = "7.0 10 dec 11:17 coffe at cantine"
+        self.version = "7.1 10 dec 11:17 coffe at cantine"
         
         
     def set_start_features(self, df):
