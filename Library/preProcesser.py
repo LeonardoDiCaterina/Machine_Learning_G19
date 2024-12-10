@@ -42,7 +42,7 @@ class PreProcessor():
         self.code_features = []
         
         
-        self.version = "7.1 10 dec 11:17 coffe at cantine"
+        self.version = "7.3 10 dec 11:17 coffe at cantine"
         
         
     def set_start_features(self, df):
@@ -997,7 +997,7 @@ class PreProcessor():
             if self.status == 'solid':
                 if  self.get_columns_to_scale() != self.get_scaled_features():
                     print("columns to scale and columns scaled are not the same")
-                    print(f"the following columns are not scaled: {set(self.get_columns_to_scale()) - set(self.column_scaled())}")
+                    print(f"the following columns are not scaled: {set(self.get_columns_to_scale()) - set(self.get_scaled_features())}")
 
             print("------------choose_columns_to_scale--------------------")
             for col in col2s:
