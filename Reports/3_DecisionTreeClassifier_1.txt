@@ -1,0 +1,27 @@
+3_DecisionTreeClassifier_1
+________________________
+model_parameters: 
+{'ccp_alpha': 0.0
+ 'class_weight': None
+ 'criterion': 'gini'
+ 'max_depth': None
+ 'max_features': None
+ 'max_leaf_nodes': None
+ 'min_impurity_decrease': 0.0
+ 'min_samples_leaf': 1
+ 'min_samples_split': 2
+ 'min_weight_fraction_leaf': 0.0
+ 'monotonic_cst': None
+ 'random_state': 0
+ 'splitter': 'best'}
+________________________
+Accuracy: 0.8798930369492883
+________________________
+Precision: 0.8296919262776707
+________________________
+Recall: 0.8798930369492883
+________________________
+Confusion Matrix:
+[[9.99415992e-01 5.84008077e-04]
+ [9.96371553e-01 3.62844702e-03]]
+________________________
