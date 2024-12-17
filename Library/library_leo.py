@@ -44,11 +44,16 @@ def entropy_corr(df, n_iter=30, n_frac=0.5):
 import pickle
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 
-def report_and_save (model,model_name,y_pred, y, model_filepath = '../Models'
-                     , report_filepath = '../Reports', print_report = True, feaure_list = None): 
+def report_and_save (model,model_name,y_pred, y,feature_list = None, model_filepath = '../Models'
+                     , report_filepath = '../Reports', print_report = True ): 
     
     
-    model_parameters = model.get_params()
+    model_parameters = " "
+    try:
+        model_parameters = model.get_params()
+    except Exception as e:
+        print(f"An error occurred while getting the model parameters: {e}")
+    
     model_filename = model_name + '.sav'
     full_model_filename_os = os.path.join(model_filepath, model_filename)
     report_filename = model_name + '.txt'
@@ -56,7 +61,7 @@ def report_and_save (model,model_name,y_pred, y, model_filepath = '../Models'
 
     try:
         with open(full_model_filename_os, 'wb') as file:
-            pickle.dump(feaure_list, file)
+            pickle.dump(feature_list, file)
             pickle.dump(model, file)
     except Exception as e:
         print(f"An error occurred while saving the model: {e}")
