@@ -1,0 +1,29 @@
+7LogisticRegression_1
+________________________
+model_parameters: 
+{'C': 1.0
+ 'class_weight': None
+ 'dual': False
+ 'fit_intercept': True
+ 'intercept_scaling': 1
+ 'l1_ratio': None
+ 'max_iter': 100
+ 'multi_class': 'deprecated'
+ 'n_jobs': None
+ 'penalty': 'l2'
+ 'random_state': 0
+ 'solver': 'lbfgs'
+ 'tol': 0.0001
+ 'verbose': 0
+ 'warm_start': False}
+________________________
+Accuracy: 0.8520983223873316
+________________________
+Precision: 0.9998940203975949
+________________________
+Recall: 0.8520983223873316
+________________________
+Confusion Matrix:
+[[0.85209286 0.14790714]
+ [0.09090909 0.90909091]]
+________________________

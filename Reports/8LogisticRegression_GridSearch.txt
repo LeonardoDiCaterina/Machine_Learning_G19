@@ -1,0 +1,48 @@
+8LogisticRegression_GridSearch
+________________________
+model_parameters: 
+{'cv': 5
+ 'error_score': nan
+ 'estimator__C': 1.0
+ 'estimator__class_weight': None
+ 'estimator__dual': False
+ 'estimator__fit_intercept': True
+ 'estimator__intercept_scaling': 1
+ 'estimator__l1_ratio': None
+ 'estimator__max_iter': 100
+ 'estimator__multi_class': 'deprecated'
+ 'estimator__n_jobs': None
+ 'estimator__penalty': 'l2'
+ 'estimator__random_state': 0
+ 'estimator__solver': 'lbfgs'
+ 'estimator__tol': 0.0001
+ 'estimator__verbose': 0
+ 'estimator__warm_start': False
+ 'estimator': LogisticRegression(random_state=0)
+ 'n_jobs': None
+ 'param_grid': {'C': [0.001
+ 0.01
+ 0.1
+ 1
+ 10
+ 100
+ 1000]
+ 'penalty': ['l1'
+ 'l2']
+ 'solver': ['liblinear']}
+ 'pre_dispatch': '2*n_jobs'
+ 'refit': True
+ 'return_train_score': False
+ 'scoring': None
+ 'verbose': 0}
+________________________
+Accuracy: 0.999163806769681
+________________________
+Precision: 0.9983283127584803
+________________________
+Recall: 0.999163806769681
+________________________
+Confusion Matrix:
+[[1. 0.]
+ [1. 0.]]
+________________________
