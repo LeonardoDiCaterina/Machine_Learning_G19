@@ -1,4 +1,4 @@
-8LogisticRegression_GridSearch
+8LogisticRegression_GridSearch_final_2
 ________________________
 model_parameters: 
 {'cv': 5
@@ -22,7 +22,6 @@ model_parameters:
  'n_jobs': None
  'param_grid': {'C': [0.001
  0.01
- 0.1
  1
  10
  100
@@ -36,13 +35,13 @@ model_parameters:
  'scoring': None
  'verbose': 0}
 ________________________
-Accuracy: 0.7719021653920527
+Accuracy: 0.7716147239691306
 ________________________
-Precision: 0.9989518980789589
+Precision: 0.9989518150917868
 ________________________
-Recall: 0.7719021653920527
+Recall: 0.7716147239691306
 ________________________
 Confusion Matrix:
-[[0.77187691 0.22812309]
+[[0.77158923 0.22841077]
  [0.19791667 0.80208333]]
 ________________________

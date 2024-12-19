@@ -1,4 +1,4 @@
-8LogisticRegression_GridSearch
+8LogisticRegression_GridSearch_final
 ________________________
 model_parameters: 
 {'cv': 5
